@@ -58,8 +58,8 @@
         var main_window = new Gtk.ApplicationWindow (this) {
             default_height = 300,
             default_width = 300,
-            title = "Taildrop",
-            titlebar = headerbar
+            title = "Taildock",
+            titlebar = headerbar,
         };
         main_window.present ();
     }
