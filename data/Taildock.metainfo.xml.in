@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.github.iancleary.Taildock</id>
+  
+  <name>Taildock</name>
+  <summary>Unofficial Tailscale Application designed for Elementary OS</summary>
+  
+  <metadata_license>CC-BY-4.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  
+  <description>
+    <p>
+      Unofficial Tailscale Application designed for Elementary OS
+    </p>
+  </description>
+  
+  <launchable type="desktop-id">com.github.iancleary.Taildock.desktop</launchable>
+</component>
