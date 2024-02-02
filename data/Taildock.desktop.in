@@ -4,8 +4,8 @@ Type=Application
 
 Name=Taildock
 Comment=Unofficial Tailscale Application designed for Elementary OS
-Categories=System Tools;GTK;
+Categories=System;GTK;
 
 Icon=com.github.iancleary.Taildock
 Exec=com.github.iancleary.Taildock
-Terminal=falses
+Terminal=false
