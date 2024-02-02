@@ -42,12 +42,14 @@ setup: ## Setup flatpak remotes and Sdk
 	@flatpak remote-add --if-not-exists --system appcenter https://flatpak.elementary.io/repo.flatpakrepo
 	@flatpak install -y appcenter io.elementary.Platform io.elementary.Sdk
 
-build:
-build:  ## Install via flatpak
+# not named build since there is a build/ directory
+# https://stackoverflow.com/a/3931814
+flatpak:
+flatpak:  ## Install via flatpak
 	@flatpak-builder build $(APPID).yml --user --install --force-clean
 
 remove:
 remove: ## Remove flatpak
-	flatpak remove $(APPID)
+	@flatpak remove $(APPID)
 
 

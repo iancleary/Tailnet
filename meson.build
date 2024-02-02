@@ -12,6 +12,7 @@ executable(
     meson.project_name(),
     'src' / 'Application.vala',
     dependencies: [
+        dependency('granite-7'),
         dependency('gtk4')
     ],
     install: true
