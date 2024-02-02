@@ -59,7 +59,7 @@
             default_height = 300,
             default_width = 300,
             title = "Taildock",
-            titlebar = headerbar,
+            titlebar = headerbar
         };
         main_window.present ();
     }
