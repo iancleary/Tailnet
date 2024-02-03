@@ -34,7 +34,7 @@ run: ## Run application build from meson and ninja
 	$(APPID)
 
 update-icon-cache:
-update-icon-cahge: ## Refresh Icon Cache
+update-icon-cache: ## Refresh Icon Cache
 	sudo update-icon-caches /usr/share/icons/*
 
 setup:
