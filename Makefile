@@ -24,6 +24,7 @@ install:
 install: ## Install via meson and ninja
 	meson build --prefix=/usr
 	cd build && ninja && ninja install
+	sudo update-icon-caches /usr/share/icons/*
 
 uninstall:
 uninstall: ## Uninstall via meson and ninja
