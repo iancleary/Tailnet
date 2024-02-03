@@ -3,10 +3,10 @@
  * SPDX-FileCopyrightText: 2024 Ian Cleary <github@iancleary.me>
  */
  
- public class MyApp : Gtk.Application {
-    public MyApp () {
+ public class Tailnet.Application : Gtk.Application {
+    public Application () {
         Object (
-            application_id: "com.github.iancleary.Taildock",
+            application_id: "com.github.iancleary.Meshscale",
             flags: ApplicationFlags.FLAGS_NONE
         );
     }
@@ -125,12 +125,12 @@
             default_width = 600,
             //  titlebar = new Gtk.Grid () { visible = false },
             titlebar = headerbar,
-            title = "Taildock"
+            title = "Meshscale"
         };
         main_window.present ();
     }
 
     public static int main (string[] args) {
-        return new MyApp ().run (args);
+        return new Application ().run (args);
     }
 }
