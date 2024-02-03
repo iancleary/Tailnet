@@ -46,6 +46,7 @@
         popover.add_css_class (Granite.STYLE_CLASS_MENU);
 
         var menu_button = new Gtk.MenuButton () {
+            can_focus = false,
             icon_name = "open-menu",
             tooltip_markup = Granite.markup_accel_tooltip ({"F10"}, "Menu"),
             popover = popover,
@@ -70,16 +71,15 @@
             title_widget = new Gtk.Label ("")
         };
         start_header.add_css_class (Granite.STYLE_CLASS_FLAT);
-        start_header.pack_start (new Gtk.WindowControls (Gtk.PackType.START));
 
         var start_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
         start_box.append (start_header);
 
         var end_header = new Gtk.HeaderBar () {
-            show_title_buttons = false
+            show_title_buttons = false,
+            title_widget = new Gtk.Label ("")
         };
         end_header.add_css_class (Granite.STYLE_CLASS_FLAT);
-        end_header.pack_end (new Gtk.WindowControls (Gtk.PackType.END));
 
         var end_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
         end_box.add_css_class (Granite.STYLE_CLASS_VIEW);
@@ -89,14 +89,24 @@
         // List of tailscale machines
         var connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
 
-        // setup margin to ensure minimum width
-        connection_list_box.set_margin_start (30);
-        connection_list_box.set_margin_end (30);
+        // setup margin to ensure minimum width (sum of this and button margin)
+        connection_list_box.set_margin_start (5);
+        connection_list_box.set_margin_end (5);
 
         string[] connection_list = {"eos-framework", "ephone", "emacos"};
         foreach (string a in connection_list) {
             //  connection_list_box.append(new Gtk.Label(a));
-            connection_list_box.append(new Gtk.Button.with_label (a));
+            var connection_button = new Gtk.Button();
+            var connection_button_label = new Gtk.Label(a);
+            connection_button_label.set_margin_start (25);
+            connection_button_label.set_margin_end (25);
+            connection_button_label.set_margin_top(5);
+            connection_button_label.set_margin_bottom(5);
+            
+            connection_button.child = connection_button_label;
+            connection_button.add_css_class (Granite.STYLE_CLASS_FLAT);
+            
+            connection_list_box.append(connection_button);
          }
 
         start_box.append (connection_list_box);
@@ -113,7 +123,8 @@
             child = paned,
             default_height = 600,
             default_width = 600,
-            titlebar = new Gtk.Grid () { visible = false },
+            //  titlebar = new Gtk.Grid () { visible = false },
+            titlebar = headerbar,
             title = "Taildock"
         };
         main_window.present ();
