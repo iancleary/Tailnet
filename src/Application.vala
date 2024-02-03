@@ -22,6 +22,18 @@
     }
 
     protected override void activate () {
+        // First we get the default instances for Granite.Settings and Gtk.Settings
+        var granite_settings = Granite.Settings.get_default ();
+        var gtk_settings = Gtk.Settings.get_default ();
+
+        // Then, we check if the user's preference is for the dark style and set it if it is
+        gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+
+        // Finally, we listen to changes in Granite.Settings and update our app if the user changes their preference
+        granite_settings.notify["prefers-color-scheme"].connect (() => {
+            gtk_settings.gtk_application_prefer_dark_theme = granite_settings.prefers_color_scheme == Granite.Settings.ColorScheme.DARK;
+        });
+
         var quit_button = new Gtk.Button () {
             action_name = "app.quit",
             child = new Granite.AccelLabel.from_action_name ("Quit", "app.quit")
