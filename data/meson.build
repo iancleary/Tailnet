@@ -1,6 +1,6 @@
 #Translate and install our .desktop file
 i18n.merge_file(
-    input: 'Taildock.desktop.in',
+    input: 'Tailnet.desktop.in',
     output: meson.project_name() + '.desktop',
     po_dir: meson.source_root() / 'po',
     type: 'desktop',
@@ -10,7 +10,7 @@ i18n.merge_file(
 
 #Translate and install our .metainfo file
 i18n.merge_file(
-    input: 'Taildock.metainfo.xml.in',
+    input: 'Tailnet.metainfo.xml.in',
     output: meson.project_name() + '.metainfo.xml',
     po_dir: meson.source_root() / 'po',
     install: true,

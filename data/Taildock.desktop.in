@@ -2,10 +2,10 @@
 Version=1.0
 Type=Application
 
-Name=Taildock
+Name=Tailnet
 Comment=Unofficial Tailscale Application designed for Elementary OS
 Categories=System;GTK;
 
-Icon=com.github.iancleary.Taildock
-Exec=com.github.iancleary.Taildock
+Icon=com.github.iancleary.Tailnet
+Exec=com.github.iancleary.Tailnet
 Terminal=false

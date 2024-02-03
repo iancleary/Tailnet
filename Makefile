@@ -4,7 +4,7 @@ PHONY: help
 TLD?= com
 DOMAIN?= github
 NS?= iancleary
-REPO?= Taildock
+REPO?= Tailnet
 
 APPID=$(TLD).$(DOMAIN).$(NS).$(REPO)
 

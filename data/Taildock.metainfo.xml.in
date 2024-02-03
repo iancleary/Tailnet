@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.github.iancleary.Taildock</id>
+  <id>com.github.iancleary.Tailnet</id>
   
-  <name>Taildock</name>
+  <name>Tailnet</name>
   <summary>Unofficial Tailscale Application designed for Elementary OS</summary>
   
   <metadata_license>CC-BY-4.0</metadata_license>
@@ -14,5 +14,5 @@
     </p>
   </description>
   
-  <launchable type="desktop-id">com.github.iancleary.Taildock.desktop</launchable>
+  <launchable type="desktop-id">com.github.iancleary.Tailnet.desktop</launchable>
 </component>
