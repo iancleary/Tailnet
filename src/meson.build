@@ -4,7 +4,8 @@ app_deps = [
 ]
 
 app_sources = [
-    'Application.vala'
+    'Application.vala',
+    'MainWindow.vala'
 ]
 
 # Create a new executable, list the files we want to compile, list the dependencies we need, and install
