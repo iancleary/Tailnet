@@ -35,7 +35,12 @@ namespace Tailnet {
         // List of devices or prompt to connect
         Gtk.Box connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
 
+        // Setup parameters for periodic timer
+        private int update_period = 10000;  // This could be stored in settings
+        private uint delayed_changed_id;
 
+        // extra notifications for debug/development purposes
+        private bool debug = true;
 
 
         public MainWindow( Tailnet.Application application) {
@@ -76,16 +81,15 @@ namespace Tailnet {
                     
                     int status_code = cli.attempt_connection();
 
-                    // sleep for a bit to allow `tailscale up` to propagate to `tailscale status`
-                    double wait = 0.75 * 1000000.0;
-                    int wait_in_seconds = (int)wait; // cast double to int
-                    Thread.usleep (wait_in_seconds); 
+                    cli.wait_for_connection_status_to_stabalize();
 
-                    string notification_title = "Connect: " + status_code.to_string() + " " + is_connected.to_string();
-                    var notification = new Notification (notification_title);
-                    notification.set_body ("This is my tailscale up notification!");
+                    if (debug == true) {
+                        string notification_title = "Debug - Connect: " + status_code.to_string() + " " + is_connected.to_string();
+                        var notification = new Notification (notification_title);
+                        notification.set_body ("`tailscale up` executed successfully!");
 
-                    application.send_notification (null, notification);
+                        application.send_notification (null, notification);
+                    }
 
                     if (status_code == 0) {
 
@@ -110,11 +114,13 @@ namespace Tailnet {
                     int status_code = cli.attempt_disconnection();
                     
 
-                    string notification_title = "Disconnect: " + status_code.to_string() + " " + is_connected.to_string();
-                    var notification = new Notification (notification_title);
-                    notification.set_body ("This is my tailscale up notification!");
+                    if (debug == true) {
+                        string notification_title = "Debug - Disconnect: " + status_code.to_string() + " " + is_connected.to_string();
+                        var notification = new Notification (notification_title);
+                        notification.set_body ("`tailscale up` executed successfully!");
 
-                    application.send_notification (null, notification);
+                        application.send_notification (null, notification);
+                    }
 
                     if (status_code == 0) {
 
@@ -136,25 +142,29 @@ namespace Tailnet {
 
         public void send_connection_successful_notification() {
             // Prepare Notification of connection
-            var notification = new Notification ("The switch is on");
-            notification.set_body ("This is my tailscale up notification!");
+            if (debug == false) {
+                var notification = new Notification ("Connected to Tailnet");
+                notification.set_body ("`tailscale up` executed successfully!");
 
-            application.send_notification (null, notification);
+                application.send_notification (null, notification);
+            }
         }
 
         public void send_disconnection_successful_notification() {
             // Prepare Notification of disconnect
                     
-            var notification = new Notification ("The switch is off");
-            notification.set_body ("This is my tailscale down notification!");
-            
-            application.send_notification (null, notification);
+            if (debug == false) {
+                var notification = new Notification ("Disconnected from Tailnet");
+                notification.set_body ("`tailscale down` executed successfully!");
+                
+                application.send_notification (null, notification);
+            }
         }
 
         public void send_connection_failure_notification() {
             // Prepare Notification of connection
-            var notification = new Notification ("Failed to connect to tailscale");
-            notification.set_body ("Failed to run tailscale up!");
+            var notification = new Notification ("Failed to connect to Tailnet");
+            notification.set_body ("Failed to run `tailscale up`!");
 
             application.send_notification (null, notification);
         }
@@ -162,8 +172,8 @@ namespace Tailnet {
         public void send_disconnection_failure_notification() {
             // Prepare Notification of disconnect
                     
-            var notification = new Notification ("Failed to disconnect tailscale");
-            notification.set_body ("Failed to run tailscale down!");
+            var notification = new Notification ("Failed to disconnect Tailnet");
+            notification.set_body ("Failed to run `tailscale down`!");
             
             application.send_notification (null, notification);
         }
@@ -195,11 +205,14 @@ namespace Tailnet {
 
             connection_list_box.set_margin_start (5);
             connection_list_box.set_margin_end (5);
-
+            
             // refresh connection status
             is_connected = cli.get_connection_status ();
 
             if (is_connected == true) {
+                start_box.valign = Gtk.Align.START;
+                connection_list_box.margin_bottom = 0;
+
                 Connection[] connection_list = cli.get_devices();
                 foreach (Connection device in connection_list) {
                     //  connection_list_box.append(new Gtk.Label(a));
@@ -217,8 +230,9 @@ namespace Tailnet {
                 }
             }
             else {
-                connection_list_box.set_margin_top (25);
-                connection_list_box.set_margin_bottom (25);
+                start_box.valign = Gtk.Align.CENTER;
+                connection_list_box.margin_bottom = 200;
+
                 var power_icon = new Gtk.MenuButton () {
                     can_focus = false,
                     icon_name = "system-shutdown-symbolic",
@@ -274,7 +288,39 @@ namespace Tailnet {
                     is_connected = true;
                     switch_toggle.set_state(true);
                 });
+
             }
+        }
+
+        private void reset_timeout(){
+            if(delayed_changed_id > 0)
+                Source.remove(delayed_changed_id);
+            delayed_changed_id = Timeout.add(update_period, timeout);
+        }
+        
+        private bool timeout(){
+            // do actual search here!
+
+            check_status_and_update_if_needed();
+
+            delayed_changed_id = 0;
+
+            return false;
+        }
+
+        public void check_status_and_update_if_needed() {
+
+            bool is_connected_status_check = cli.get_connection_status();
+
+            if (is_connected != is_connected_status_check) {
+                is_connected = is_connected_status_check;
+                
+                // These will update UI and send notifications as needed
+                update_headerbar();
+                update_body();
+            }
+
+            reset_timeout();
         }
     
         construct {
@@ -296,7 +342,7 @@ namespace Tailnet {
 
             // Assign as ApplicationWindow.titlebar
             titlebar = headerbar;
-            
+             
             // Update headerbar widgets according to `is_connected`
             update_headerbar();
 
@@ -322,6 +368,14 @@ namespace Tailnet {
             default_width = 600;
             default_height = 600;
             
+            // debug specific settings
+
+            if (debug == true) {
+                update_period = 2000; // 2 seconds
+            }
+
+            // setup periodic check of tailscale connection
+            timeout();
         }
 
         //  Connection[] update_start_pane(bool is_connected) {
