@@ -8,6 +8,7 @@ project(
 # Setup Dependenies, used in src/meson.build
 gtk_dep = dependency('gtk4')
 granite_dep = dependency('granite-7')
+# posix_dep = meson.get_compiler('vala').find_library('posix')
 
 # run 'x'/meson.build files from sub directories
 # https://mesonbuild.com/Reference-manual_functions.html#subdir
