@@ -18,26 +18,25 @@
 
 namespace Tailnet {
     struct Connection {
-        public string ipv4_address;
+        //  public string ipv4_address;
         public string name;
-        public string username;
-        public string operating_system;
+        //  public string username;
+        //  public string operating_system;
         public string status;
     
-        public void print() {
-            stdout.printf ("%s, %s, %s, %s, %s\n", ipv4_address, name, username, operating_system, status);
-        }
+        //  public void print() {
+        //      stdout.printf ("%s, %s, %s, %s, %s\n", ipv4_address, name, username, operating_system, status);
+        //  }
     }
 
     class CommandLineInterface : Object {
-        public bool connected;
 
-        public bool is_user_an_operator() {
-            // Checks whether or not `tailscale` command is allowed by this user
+        //  public bool is_user_an_operator() {
+        //      // Checks whether or not `tailscale` command is allowed by this user
 
-            // To be implemented
-            return true;
-        }
+        //      // To be implemented
+        //      return true;
+        //  }
 
         public bool get_connection_status() {
             Connection[] connection_list = get_devices();
@@ -55,6 +54,13 @@ namespace Tailnet {
 
             // offline
             return false;
+        }
+
+        public void wait_for_connection_status_to_stabalize() {
+            // sleep for a bit to allow `tailscale up` to propagate to `tailscale status`
+            double wait = 0.75 * 1000000.0;
+            int wait_in_seconds = (int)wait; // cast double to int
+            Thread.usleep (wait_in_seconds); 
         }
 
         public int attempt_connection() {
@@ -155,10 +161,10 @@ namespace Tailnet {
                         }
         
                         var connection = Connection() {
-                            ipv4_address = line_parts[0],
+                            //  ipv4_address = line_parts[0],
                             name = line_parts[1],
-                            username = line_parts[2].replace("@",""),
-                            operating_system = line_parts[3],
+                            //  username = line_parts[2].replace("@",""),
+                            //  operating_system = line_parts[3],
                             status = status,
                         };
                         connection_list += connection;
