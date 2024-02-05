@@ -26,6 +26,10 @@ namespace Tailnet {
         construct {
             title = "Tailnet";
             icon_name = "com.github.iancleary.Tailnet";
+
+            // src/CommandLineInterface.vala
+            // wrapper around tailscale CLI
+            var cli = new CommandLineInterface();
     
             var quit_button = new Gtk.Button () {
                 action_name = "app.quit",
@@ -50,6 +54,23 @@ namespace Tailnet {
             var switch_toggle = new Gtk.Switch ();
             switch_toggle.set_margin_top(5);
             switch_toggle.set_margin_bottom(5);
+
+            // Check state of tailscale...set switch_toggle state so it starts up correctly
+
+
+            // Connect signal to notifications after initial state is set
+            switch_toggle.notify["active"].connect (() => {
+                if (switch_toggle.active) {
+                    var notification = new Notification ("The switch is on");
+                    notification.set_body ("This is my tailscale up notification!");
+
+                    application.send_notification (null, notification);
+                } else {
+                    var notification = new Notification ("The switch is off");
+                    notification.set_body ("This is my tailscale down notification!");
+                    application.send_notification (null, notification);
+                }
+            });
     
             var headerbar = new Gtk.HeaderBar () {
                 show_title_buttons = true
@@ -87,10 +108,6 @@ namespace Tailnet {
             // setup margin to ensure minimum width (sum of this and button margin)
             connection_list_box.set_margin_start (5);
             connection_list_box.set_margin_end (5);
-    
-
-            var cli = new CommandLineInterface();
-
 
             Connection[] connection_list = cli.get_devices();
             foreach (Connection device in connection_list) {
