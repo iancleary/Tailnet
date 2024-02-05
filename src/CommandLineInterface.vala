@@ -39,6 +39,58 @@ namespace Tailnet {
             return true;
         }
 
+        public bool get_connection_status() {
+            Connection[] connection_list = get_devices();
+
+            if (connection_list.length == 0) {
+                return false;
+            }
+
+            // relies on CLI output sorting, which appears stable
+            Connection this_device = connection_list[0];
+
+            if (this_device.status == "online") {
+                return true;
+            }
+
+            // offline
+            return false;
+        }
+
+        public int attempt_connection() {
+            string command_stdout;
+            string command_stderr;
+            int command_status;
+
+            try {
+                Process.spawn_command_line_sync ("tailscale up",
+                                            out command_stdout,
+                                            out command_stderr,
+                                            out command_status);
+            } catch (SpawnError e) {
+                print ("Error: %s\n", e.message);
+                return 1;
+            }
+            return 0;
+        }
+
+        public int attempt_disconnection() {
+            string command_stdout;
+            string command_stderr;
+            int command_status;
+
+            try {
+                Process.spawn_command_line_sync ("tailscale down",
+                                            out command_stdout,
+                                            out command_stderr,
+                                            out command_status);
+            } catch (SpawnError e) {
+                print ("Error: %s\n", e.message);
+                return 1;
+            }
+            return 0;
+        }
+
 
         public Connection[] get_devices() {
             string command_stdout;
