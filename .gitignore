@@ -2,3 +2,6 @@ src/Application
 build/
 builddir/
 .flatpak-builder/
+
+# scrathpad for function development
+scratchpad
