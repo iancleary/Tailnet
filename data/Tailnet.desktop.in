@@ -9,3 +9,5 @@ Categories=System;GTK;
 Icon=com.github.iancleary.Tailnet
 Exec=com.github.iancleary.Tailnet
 Terminal=false
+
+X-GNOME-UsesNotifications=true
