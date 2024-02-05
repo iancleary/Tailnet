@@ -16,28 +16,6 @@
 * Boston, MA 02110-1301 USA
 */
 
-//  namespace Tailnet {
-//      public class MainWindow: Gtk.ApplicationWindow {
-//          public Gtk.Object child { get; construct; }
-//          public int default_height { get; construct; }
-//          public int default_width { get; construct; }
-
-//          public MainWindow( int default_height, int default_width ) {
-//              Gtk.ApplicationWindow (
-//                  child: paned,
-//                  default_height: default_height,
-//                  default_width: default_width
-//              );
-//          }
-        
-//          construct {
-//              var default_height = default_height;
-//              var default_width = default_width;
-//          }
-//      }
-
-//  }
-
 namespace Tailnet {
     public class MainWindow: Gtk.ApplicationWindow {
     
@@ -110,11 +88,15 @@ namespace Tailnet {
             connection_list_box.set_margin_start (5);
             connection_list_box.set_margin_end (5);
     
-            string[] connection_list = {"eos-framework", "ephone"};
-            foreach (string a in connection_list) {
+
+            var cli = new CommandLineInterface();
+
+
+            Connection[] connection_list = cli.get_devices();
+            foreach (Connection device in connection_list) {
                 //  connection_list_box.append(new Gtk.Label(a));
                 var connection_button = new Gtk.Button();
-                var connection_button_label = new Gtk.Label(a);
+                var connection_button_label = new Gtk.Label(device.name);
                 connection_button_label.set_margin_start (25);
                 connection_button_label.set_margin_end (25);
                 connection_button_label.set_margin_top(5);
