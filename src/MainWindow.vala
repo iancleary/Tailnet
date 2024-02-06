@@ -215,7 +215,9 @@ namespace Tailnet {
         }
 
         public void create_reconnect_prompt_box() {
-            reconnect_prompt_box.set_margin_bottom(200);
+            // Bottom margin makes it "feel" more centered,
+            // since the button is at the bottom of the box
+            reconnect_prompt_box.set_margin_bottom(100);
             
             var power_icon = new Gtk.MenuButton () {
                 can_focus = false,
