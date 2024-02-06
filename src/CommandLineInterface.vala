@@ -18,7 +18,7 @@
 
 namespace Tailnet {
     struct Connection {
-        //  public string ipv4_address;
+        public string ipv4_address;
         public string name;
         //  public string username;
         //  public string operating_system;
@@ -161,7 +161,7 @@ namespace Tailnet {
                         }
         
                         var connection = Connection() {
-                            //  ipv4_address = line_parts[0],
+                            ipv4_address = line_parts[0],
                             name = line_parts[1],
                             //  username = line_parts[2].replace("@",""),
                             //  operating_system = line_parts[3],

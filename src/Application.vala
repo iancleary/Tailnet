@@ -35,7 +35,7 @@
         });
 
         var main_window = new MainWindow(this);
-        main_window.resizable = false;
+        main_window.resizable = true;
         main_window.present ();
     }
 
