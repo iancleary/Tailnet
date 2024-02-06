@@ -33,7 +33,7 @@ namespace Tailnet {
         Gtk.Label connection_status_label = new Gtk.Label("");
 
         // List of devices or prompt to connect
-        Gtk.Box connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
+        Gtk.Box connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
 
         // Setup parameters for periodic timer
         private int update_period = 10000;  // This could be stored in settings
@@ -211,27 +211,74 @@ namespace Tailnet {
 
             if (is_connected == true) {
                 start_box.valign = Gtk.Align.START;
-                connection_list_box.margin_bottom = 0;
+                start_box.set_margin_top(25);
+                connection_list_box.set_margin_bottom(0);
 
                 Connection[] connection_list = cli.get_devices();
                 foreach (Connection device in connection_list) {
-                    //  connection_list_box.append(new Gtk.Label(a));
-                    var connection_button = new Gtk.Button();
-                    var connection_button_label = new Gtk.Label(device.name);
-                    connection_button_label.set_margin_start (25);
-                    connection_button_label.set_margin_end (25);
-                    connection_button_label.set_margin_top(5);
-                    connection_button_label.set_margin_bottom(5);
+
+                    Gtk.Button connection_button = new Gtk.Button();
+                    //  Gtk.Box connection_button = new Gtk.Box(Gtk.Orientation.VERTICAL, 5);
+                    //  connection_button.set_focusable(true);
+                    //  connection_button.set_can_focus(true);
+                    //  connection_button.focus_on_click = true;
                     
-                    connection_button.child = connection_button_label;
+                    var connection_name_label = new Gtk.Label(null);
+                    connection_name_label.set_markup ("<b>"+device.name + "</b>");
+                    var connection_status_icon = new Gtk.MenuButton() {
+                        can_focus = false,
+                        icon_name = "mail-unread-symbolic",
+                        primary = true
+                    };
+
+                    if (device.status == "online") {
+                        connection_status_icon.add_css_class("success");
+                    }
+                    else {
+                        connection_status_icon.add_css_class("theme_unfocused_text_color");
+                    }
+
+                    Gtk.Box connection_label_top_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
+                    connection_label_top_row.append(connection_status_icon);
+                    connection_label_top_row.append(connection_name_label);
+                    connection_label_top_row.set_margin_start(25);
+                    connection_label_top_row.set_margin_end(25);
+                    connection_label_top_row.halign = Gtk.Align.START;
+
+
+                    Gtk.Label connection_label_bottom_row = new Gtk.Label(device.ipv4_address);
+                    connection_label_bottom_row.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+                    connection_label_bottom_row.halign = Gtk.Align.START;
+                    connection_label_bottom_row.set_margin_start (35);
+                    connection_label_bottom_row.set_margin_end(25);
+
+                    Gtk.Box connection_label_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 2);
+                    connection_label_box.append(connection_label_top_row);
+                    connection_label_box.append(connection_label_bottom_row);
+                    
+                    
+
+                    //  connection_label_box.set_margin_start (25);
+                    //  connection_label_box.set_margin_end (25);
+                    connection_label_box.set_margin_top(0);
+                    connection_label_box.set_margin_bottom(0);
+
+                    connection_button.set_child(connection_label_box);
                     connection_button.add_css_class (Granite.STYLE_CLASS_FLAT);
                     
                     connection_list_box.append(connection_button);
+
+                    // Add horizontal rule separator between children
+                    Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+                    hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+                    hr.set_margin_top(5);
+                    connection_list_box.append(hr);
                 }
             }
             else {
                 start_box.valign = Gtk.Align.CENTER;
-                connection_list_box.margin_bottom = 200;
+                start_box.set_margin_top(0);
+                connection_list_box.set_margin_bottom(200);
 
                 var power_icon = new Gtk.MenuButton () {
                     can_focus = false,
