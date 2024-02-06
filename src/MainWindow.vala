@@ -218,24 +218,22 @@ namespace Tailnet {
                 foreach (Connection device in connection_list) {
 
                     Gtk.Button connection_button = new Gtk.Button();
-                    //  Gtk.Box connection_button = new Gtk.Box(Gtk.Orientation.VERTICAL, 5);
-                    //  connection_button.set_focusable(true);
-                    //  connection_button.set_can_focus(true);
-                    //  connection_button.focus_on_click = true;
-                    
+
                     var connection_name_label = new Gtk.Label(null);
                     connection_name_label.set_markup ("<b>"+device.name + "</b>");
+
                     var connection_status_icon = new Gtk.MenuButton() {
                         can_focus = false,
-                        icon_name = "mail-unread-symbolic",
                         primary = true
                     };
 
                     if (device.status == "online") {
-                        connection_status_icon.add_css_class("success");
+                        // Green Dot
+                        connection_status_icon.set_icon_name("user-available");
                     }
                     else {
-                        connection_status_icon.add_css_class("theme_unfocused_text_color");
+                        // Gray Dot
+                        connection_status_icon.set_icon_name("user-offline");
                     }
 
                     Gtk.Box connection_label_top_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
@@ -255,17 +253,13 @@ namespace Tailnet {
                     Gtk.Box connection_label_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 2);
                     connection_label_box.append(connection_label_top_row);
                     connection_label_box.append(connection_label_bottom_row);
-                    
-                    
 
-                    //  connection_label_box.set_margin_start (25);
-                    //  connection_label_box.set_margin_end (25);
                     connection_label_box.set_margin_top(0);
                     connection_label_box.set_margin_bottom(0);
 
                     connection_button.set_child(connection_label_box);
                     connection_button.add_css_class (Granite.STYLE_CLASS_FLAT);
-                    
+
                     connection_list_box.append(connection_button);
 
                     // Add horizontal rule separator between children
