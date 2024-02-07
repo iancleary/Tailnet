@@ -20,49 +20,38 @@ namespace Tailnet {
 
     public class MainWindow: Gtk.ApplicationWindow {
     
-        CommandLineInterface cli = new CommandLineInterface();
+        CommandLineInterface cli;
 
         // Default to false, but poll CLI during construct, so initial state is never used
-        bool is_connected = false;
+        private bool is_connected;
         // bool to track UI state to connection state
-        bool content_box_state = false;
-
-        // List of devices in tailnet
-        Connection[] connection_list = {};
-
-        // to store wheter the UI shows the connection list/pane or reconnect prompt box
-        Gtk.Box content_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-        
-        Gtk.Box start_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-        Gtk.Box end_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-        
-        // List of devices or prompt to connect
-        Gtk.Box connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
-        //  Gtk.Box reconnect_prompt_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
-        Gtk.Box reconnect_prompt_box = null;
-
-
-        // Main UI Widget
-        Gtk.Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL) {
-            resize_start_child = false,
-            shrink_end_child = false,
-            shrink_start_child = false,
-        };
-        
-        // titlebar
-        Gtk.HeaderBar headerbar = new Gtk.HeaderBar () {
-            show_title_buttons = true
-        };
-        Gtk.Switch switch_toggle = new Gtk.Switch ();
-        Gtk.Label connection_status_label = new Gtk.Label("");
-
+        private bool content_box_state;
 
         // Setup parameters for periodic timer
-        private int update_period = 10000;  // This could be stored in settings
+        private int update_period;
         private uint delayed_changed_id;
 
         // extra notifications for debug/development purposes
-        private bool debug = false;
+        private bool debug;
+        // List of devices in tailnet
+        private Connection[] connection_list;
+
+        // Main UI Box to store wheter the UI shows the connection list/pane or reconnect prompt box
+        private Gtk.Box content_box;
+        
+        // Main UI when connected
+        private Gtk.Paned paned;
+        // List of devices or prompt to connect
+        private Gtk.Box connection_list_box;
+        private Gtk.Box end_box;
+        
+        //  Gtk.Box reconnect_prompt_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
+        private Gtk.Box reconnect_prompt_box;
+        
+        // titlebar
+        private Gtk.HeaderBar headerbar;
+        private Gtk.Switch switch_toggle;
+        private Gtk.Label connection_status_label;
 
 
         public MainWindow( Tailnet.Application application) {
@@ -402,21 +391,59 @@ namespace Tailnet {
             title = "Tailnet";
             icon_name = "com.github.iancleary.Tailnet";
 
+            cli = new CommandLineInterface();
+
             // Check initial state of tailscale up/down
             is_connected = cli.get_connection_status ();
             
             // Ensure initial states match
             content_box_state = is_connected;
+
+            // List of devices in tailnet
+            if (is_connected == true) {
+                connection_list = cli.get_devices();
+            }
+            else {
+                connection_list = {};
+            }
+
+            // to store wheter the UI shows the connection list/pane or reconnect prompt box
+            content_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             
-            // src/CommandLineInterface.vala
-            // wrapper around tailscale CLI
-            //  var cli = new CommandLineInterface();
-    
+            // List of devices or prompt to connect
+            connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
+            end_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            
+            // prompt to show that you are not connected and prompt a reconnection
+            reconnect_prompt_box = new ReconnectPromptBox(this);
+
+                        
+            // Main UI Widget
+            paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL) {
+                start_child = connection_list_box,
+                end_child = end_box,
+                resize_start_child = false,
+                shrink_end_child = false,
+                shrink_start_child = false,
+            };
+            
+            // titlebar
+            headerbar = new Gtk.HeaderBar () {
+                show_title_buttons = true
+            };
+            switch_toggle = new Gtk.Switch ();
+            connection_status_label = new Gtk.Label("");
+
+
+            // Setup parameters for periodic timer
+            update_period = 10000;  // This could be stored in settings
+
+            // extra notifications for debug/development purposes
+            debug = false;
             
         
             // Setup Static UI (where number of widgets doesn't depend on device count)
             create_headerbar();
-            reconnect_prompt_box = new ReconnectPromptBox(this);
             
             // Update headerbar widgets according to `is_connected`
             update_headerbar();
@@ -427,13 +454,7 @@ namespace Tailnet {
             // Update based upon tailscale status
             update_connection_list_box();
 
-            // Setup Paned Layout Widget
-            paned.start_child = connection_list_box;
-            paned.end_child = end_box;
-            start_box.valign = Gtk.Align.START;
-            start_box.set_margin_top(25);
-            start_box.append(connection_list_box);
-
+            
             // Setup left pane, depending on connection status
             update_main_ui();
 
