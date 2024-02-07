@@ -6,7 +6,8 @@ app_deps = [
 app_sources = [
     'Application.vala',
     'MainWindow.vala',
-    'CommandLineInterface.vala'
+    'CommandLineInterface.vala',
+    'Widgets/ReconnectPromptBox.vala'
 ]
 
 # Create a new executable, list the files we want to compile, list the dependencies we need, and install

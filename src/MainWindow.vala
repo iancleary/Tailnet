@@ -17,6 +17,7 @@
 */
 
 namespace Tailnet {
+
     public class MainWindow: Gtk.ApplicationWindow {
     
         CommandLineInterface cli = new CommandLineInterface();
@@ -37,7 +38,9 @@ namespace Tailnet {
         
         // List of devices or prompt to connect
         Gtk.Box connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
-        Gtk.Box reconnect_prompt_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
+        //  Gtk.Box reconnect_prompt_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
+        Gtk.Box reconnect_prompt_box = null;
+
 
         // Main UI Widget
         Gtk.Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL) {
@@ -214,69 +217,11 @@ namespace Tailnet {
             }
         }
 
-        public void create_reconnect_prompt_box() {
-            // Bottom margin makes it "feel" more centered,
-            // since the button is at the bottom of the box
-            reconnect_prompt_box.set_margin_bottom(100);
-            
-            var power_icon = new Gtk.MenuButton () {
-                can_focus = false,
-                icon_name = "system-shutdown-symbolic",
-                primary = true
-            };
-
-            reconnect_prompt_box.append(power_icon);
-            
-
-
-            var disconnected_label = new Gtk.Label(null);
-            disconnected_label.set_markup ("<b>Not Connected</b>");
-            disconnected_label.set_margin_start (25);
-            disconnected_label.set_margin_end (25);
-            disconnected_label.set_margin_top(0);
-            disconnected_label.set_margin_bottom(0);
-
-            reconnect_prompt_box.append(disconnected_label);
-
-            var disconnected_detailed_label_top = new Gtk.Label("Connect again to talk to");
-            disconnected_detailed_label_top.set_margin_start (25);
-            disconnected_detailed_label_top.set_margin_end (25);
-            disconnected_detailed_label_top.set_margin_top(5);
-            disconnected_detailed_label_top.set_margin_bottom(0);
-
-            reconnect_prompt_box.append(disconnected_detailed_label_top);
-
-            var disconnected_detailed_label_bottom = new Gtk.Label("the other devices in the tailnet.");
-            disconnected_detailed_label_bottom.set_margin_start (25);
-            disconnected_detailed_label_bottom.set_margin_end (25);
-            disconnected_detailed_label_bottom.set_margin_top(0);
-            disconnected_detailed_label_bottom.set_margin_bottom(5);
-            reconnect_prompt_box.append(disconnected_detailed_label_bottom);
-
-
-            var connect_button = new Gtk.Button();
-            var connect_button_label = new Gtk.Label(null);
-            connect_button_label.set_markup("<b>Connect</b>");
-            connect_button_label.set_margin_start (25);
-            connect_button_label.set_margin_end (25);
-            connect_button_label.set_margin_top(5);
-            connect_button_label.set_margin_bottom(5);
-
-            connect_button.set_margin_start(5);
-            connect_button.set_margin_end(5);
-            
-            connect_button.child = connect_button_label;
-            connect_button.add_css_class (Granite.STYLE_CLASS_FLAT);
-            reconnect_prompt_box.append(connect_button);
-
-            // Button pressed transitions from OFF to ON 
-            connect_button.clicked.connect (() => {
-                // tailscale up -> ON
-                // Run command first, then if exit code is 0, proceed to update UI
-                is_connected = true;
-                switch_toggle.set_state(true);
-            });
-
+        public void reconnect() {
+            // tailscale up -> ON
+            // Run command first, then if exit code is 0, proceed to update UI
+            is_connected = true;
+            switch_toggle.set_state(true);
         }
 
         public void update_main_ui() {
@@ -471,7 +416,7 @@ namespace Tailnet {
         
             // Setup Static UI (where number of widgets doesn't depend on device count)
             create_headerbar();
-            create_reconnect_prompt_box();
+            reconnect_prompt_box = new ReconnectPromptBox(this);
             
             // Update headerbar widgets according to `is_connected`
             update_headerbar();
