@@ -102,19 +102,19 @@ namespace Tailnet {
                 if (switch_toggle.active) {
                     // tailscale up -> ON
                     
-                    int status_code = cli.attempt_connection();
+                    Command connect_command = cli.attempt_connection();
 
                     cli.wait_for_connection_status_to_stabalize();
 
                     if (debug == true) {
-                        string notification_title = "Debug - Connect: " + status_code.to_string() + " " + is_connected.to_string();
+                        string notification_title = "Debug - Connect: " + connect_command.status.to_string() + " " + is_connected.to_string();
                         var notification = new Notification (notification_title);
                         notification.set_body ("`tailscale up` executed successfully!");
 
                         application.send_notification (null, notification);
                     }
 
-                    if (status_code == 0) {
+                    if (connect_command.status == 0) {
 
                         // Update state variables
                         is_connected = true;
@@ -137,18 +137,18 @@ namespace Tailnet {
                 } else {
                     // tailscale down -> OFF
                     
-                    int status_code = cli.attempt_disconnection();
+                    Command disconnect_command = cli.attempt_disconnection();
                     
 
                     if (debug == true) {
-                        string notification_title = "Debug - Disconnect: " + status_code.to_string() + " " + is_connected.to_string();
+                        string notification_title = "Debug - Disconnect: " + disconnect_command.status.to_string() + " " + is_connected.to_string();
                         var notification = new Notification (notification_title);
                         notification.set_body ("`tailscale up` executed successfully!");
 
                         application.send_notification (null, notification);
                     }
 
-                    if (status_code == 0) {
+                    if (disconnect_command.status == 0) {
 
                         is_connected = false;
 

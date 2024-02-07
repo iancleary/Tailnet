@@ -29,6 +29,13 @@ namespace Tailnet {
         //  }
     }
 
+    struct Command {
+        public string stdout;
+        public string stderr;
+        public int status;
+        public SpawnError e;
+    }
+
     class CommandLineInterface : Object {
 
         //  public bool is_user_an_operator() {
@@ -38,6 +45,20 @@ namespace Tailnet {
         //      return true;
         //  }
 
+        private Command send_command(string command_string) {
+            Command command = Command();
+
+            try {
+                Process.spawn_command_line_sync (command_string,
+                                            out command.stdout,
+                                            out command.stderr,
+                                            out command.status);
+            } catch (SpawnError e) {
+                command.e = e;
+            }
+            return command;
+        } 
+        
         public bool get_connection_status() {
             Connection[] connection_list = get_devices();
 
@@ -63,61 +84,24 @@ namespace Tailnet {
             Thread.usleep (wait_in_seconds); 
         }
 
-        public int attempt_connection() {
-            string command_stdout;
-            string command_stderr;
-            int command_status;
-
-            try {
-                Process.spawn_command_line_sync ("tailscale up",
-                                            out command_stdout,
-                                            out command_stderr,
-                                            out command_status);
-            } catch (SpawnError e) {
-                print ("Error: %s\n", e.message);
-                return 1;
-            }
-            return 0;
+        public Command attempt_connection() {
+            return send_command("tailscale up");
         }
 
-        public int attempt_disconnection() {
-            string command_stdout;
-            string command_stderr;
-            int command_status;
-
-            try {
-                Process.spawn_command_line_sync ("tailscale down",
-                                            out command_stdout,
-                                            out command_stderr,
-                                            out command_status);
-            } catch (SpawnError e) {
-                print ("Error: %s\n", e.message);
-                return 1;
-            }
-            return 0;
+        public Command attempt_disconnection() {
+            return send_command("tailscale down");
         }
 
 
         public Connection[] get_devices() {
-            string command_stdout;
-            string command_stderr;
-            int command_status;
-
-            try {
-                Process.spawn_command_line_sync ("tailscale status",
-                                            out command_stdout,
-                                            out command_stderr,
-                                            out command_status);
-            } catch (SpawnError e) {
-                print ("Error: %s\n", e.message);
-            }
+            Command status_command = send_command("tailscale status");
 
             Connection[] connection_list = {};
 
             bool end_of_connections = false;
             
             //  print("\n----------\n");
-            foreach (string line in command_stdout.split("\n")) {
+            foreach (string line in status_command.stdout.split("\n")) {
         
                 // placeholders
                 string result = "";
