@@ -1,11 +1,10 @@
-class Tailnet.ConnectionInfoItem : Gtk.Box {
+class Tailnet.ConnectionInfoItem : Gtk.Button {
     // Setup parameters for periodic timer
     private int update_period;
     private uint delayed_changed_id;
     private bool in_callback;
     private int wait_in_seconds;
 
-    private Gtk.Button content_button;
     private Gtk.Box content_box;
     private Gtk.Button copy_button;
     private Gtk.Button copy_complete_button;
@@ -60,33 +59,35 @@ class Tailnet.ConnectionInfoItem : Gtk.Box {
 
     construct {
 
-        content_button = new Gtk.Button() {focusable = false};
-        content_button.add_css_class(Granite.STYLE_CLASS_FLAT);
+        focusable = false;
+        add_css_class(Granite.STYLE_CLASS_FLAT);
 
-        content_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        content_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
+        halign = Gtk.Align.START;
+        content_box.set_margin_start (35);
+        content_box.set_margin_end(25);
 
-        append(content_button);
+        set_child(content_box);
 
-        content_button.set_child(content_box);
+        Gtk.Label label = new Gtk.Label(information_to_display);
+        label.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
 
+        content_box.append(label);
         copy_button = new Gtk.Button.from_icon_name("edit-copy") {focusable = false};
         copy_complete_button = new Gtk.Button.from_icon_name("emblem-default") {focusable = false};
 
-        //  copy_button.set_visible(true);
         copy_complete_button.set_visible(false);
         content_box.append(copy_button);
         content_box.append(copy_complete_button);
 
 
-        content_button.clicked.connect(() => {
+        clicked.connect(() => {
             in_callback = true;
             set_clipboard(information_to_display);
             copy_button.set_visible(false);
             copy_complete_button.set_visible(true);
            
         });
-
-        orientation = Gtk.Orientation.VERTICAL;
 
         // wait in seconds should be half of update_period
         update_period = 500; // milliseconds -> 0.5 seconds
@@ -206,18 +207,8 @@ class Tailnet.ConnectionListItem : Gtk.Box {
         return row;
     }
 
-    public Gtk.Box get_detailed_row(string text) {
-        Gtk.Box row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-        Gtk.Label label = new Gtk.Label(text);
-
-        ConnectionInfoItem info_item = new ConnectionInfoItem(text);
-        label.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
-        row.halign = Gtk.Align.START;
-        row.set_margin_start (35);
-        row.set_margin_end(25);
-
-        row.append(label);
-        row.append(info_item);
-        return row;
+    public ConnectionInfoItem get_detailed_row(string text) {
+        ConnectionInfoItem button_row = new ConnectionInfoItem(text); 
+        return button_row;
     }
 }
