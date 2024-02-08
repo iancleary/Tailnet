@@ -19,6 +19,7 @@
 namespace Tailnet {
     struct Connection {
         public string ipv4_address;
+        public string? ipv6_address;
         public string name;
         //  public string username;
         //  public string operating_system;
@@ -159,6 +160,17 @@ namespace Tailnet {
                 }
             }
             return connection_list;
+        }
+
+        public Connection get_device_ip(string device) {
+            Command ip_command = send_command("tailscale ip " + device);
+
+            Connection connection = Connection();
+            
+            string[] lines = ip_command.stdout.split("\n"); 
+            connection.ipv4_address = lines[0];
+            connection.ipv6_address = lines[1];
+            return connection;
         }
     }
 }

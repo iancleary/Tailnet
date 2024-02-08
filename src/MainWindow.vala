@@ -40,10 +40,11 @@ namespace Tailnet {
         private Gtk.Box content_box;
         
         // Main UI when connected
-        private Gtk.Paned paned;
+        private Gtk.Box paned;
         // List of devices or prompt to connect
         private Gtk.Box connection_list_box;
-        private Gtk.Box end_box;
+        private Gtk.Box info_box;
+        private Connection selected_device;
         
         //  Gtk.Box reconnect_prompt_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
         private Gtk.Box reconnect_prompt_box;
@@ -228,14 +229,23 @@ namespace Tailnet {
                 
                 content_box.valign = Gtk.Align.CENTER;
                 content_box.halign = Gtk.Align.CENTER;
+                content_box.set_hexpand(false);
 
                 content_box.append(reconnect_prompt_box);
             }
             else {
                 content_box_state = false;
                 
-                content_box.valign = Gtk.Align.START;
-                content_box.halign = Gtk.Align.START;
+                content_box.valign = Gtk.Align.FILL;
+                content_box.halign = Gtk.Align.FILL;
+
+                Gtk.Separator vr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+                vr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+
+                content_box.append(connection_list_box);
+                content_box.append(vr);
+                content_box.append(info_box);
+                content_box.set_hexpand(true);
                 
                 content_box.append(paned);
             }
@@ -304,6 +314,11 @@ namespace Tailnet {
                 connection_button.set_child(connection_label_box);
                 connection_button.add_css_class (Granite.STYLE_CLASS_FLAT);
 
+                connection_button.clicked.connect(() => {
+                    selected_device = device;
+                    update_info_box();
+                });
+
                 connection_list_box.append(connection_button);
 
                 // Add horizontal rule separator between children
@@ -312,6 +327,57 @@ namespace Tailnet {
                 hr.set_margin_top(5);
                 connection_list_box.append(hr);
             }   
+        }
+
+        public void update_info_box() {
+            // setup margin to ensure minimum width (sum of this and button margin)
+            
+            // Remove all children
+            Gtk.Widget? first_child = info_box.get_first_child();
+
+            while (first_child != null) {
+                info_box.remove(first_child);
+                first_child = info_box.get_first_child();
+            }
+
+            // get device information
+            Connection ip_addresses = cli.get_device_ip(selected_device.name);
+
+            var addresses_label = new Gtk.Label(null);
+            addresses_label.set_markup ("<b>Tailscale Addresses</b>");
+            addresses_label.set_hexpand(true);
+            addresses_label.set_vexpand(true);
+
+
+            info_box.append(addresses_label);
+
+
+            var ipv4_address_label = new Gtk.Label(ip_addresses.ipv4_address);
+            var ipv6_address_label = new Gtk.Label(ip_addresses.ipv6_address);
+
+            ipv4_address_label.set_hexpand(true);
+            ipv6_address_label.set_hexpand(true);
+            ipv4_address_label.set_vexpand(true);
+            ipv6_address_label.set_vexpand(true);
+            ipv4_address_label.halign = Gtk.Align.FILL;
+            ipv6_address_label.halign = Gtk.Align.FILL;
+
+            // Add horizontal rule separator between children
+            
+            Gtk.Label[] ip_address_labels = {ipv4_address_label, ipv6_address_label};
+
+            foreach(Gtk.Label label in ip_address_labels) {
+                Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+                hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+                hr.set_margin_top(5);
+
+                hr.set_hexpand(true);
+                hr.halign = Gtk.Align.CENTER;
+                hr.set_vexpand(true);
+
+                info_box.append(hr);
+                info_box.append(label);
+            }
         }
 
         private void reset_state() {
@@ -402,31 +468,50 @@ namespace Tailnet {
             // List of devices in tailnet
             if (is_connected == true) {
                 connection_list = cli.get_devices();
+
+                // Show information about first device if it exists
+                if (connection_list.length > 0) {
+                    selected_device = connection_list[0];
+                    // Update based upon tailscale status
+                    update_connection_list_box();
+                    
+                    update_info_box();
+                    
+                }
             }
             else {
                 connection_list = {};
             }
 
             // to store wheter the UI shows the connection list/pane or reconnect prompt box
-            content_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            content_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
             
             // List of devices or prompt to connect
-            connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
-            end_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);            
+            connection_list_box.set_vexpand(true);
+
+            info_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);
+            info_box.valign = Gtk.Align.CENTER;
+            info_box.halign = Gtk.Align.CENTER;
+            info_box.set_hexpand(true);
+            info_box.set_vexpand(true);
+
+            info_box.add_css_class(Granite.STYLE_CLASS_VIEW);
             
             // prompt to show that you are not connected and prompt a reconnection
             reconnect_prompt_box = new ReconnectPromptBox(this);
 
-                        
             // Main UI Widget
-            paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL) {
-                start_child = connection_list_box,
-                end_child = end_box,
-                resize_start_child = false,
-                shrink_end_child = false,
-                shrink_start_child = false,
-            };
-            
+            paned = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
+            paned.add_css_class(Granite.STYLE_CLASS_CARD);
+
+            content_box.halign = Gtk.Align.FILL;
+            content_box.valign = Gtk.Align.FILL;
+            content_box.set_vexpand(true);
+            content_box.set_hexpand(true);
+            content_box.add_css_class(Granite.STYLE_CLASS_FLAT);
+
+            //  add_css_class(Granite.STYLE_CLASS_CHECKERBOARD);
             // titlebar
             headerbar = new Gtk.HeaderBar () {
                 show_title_buttons = true
@@ -441,7 +526,6 @@ namespace Tailnet {
             // extra notifications for debug/development purposes
             debug = false;
             
-        
             // Setup Static UI (where number of widgets doesn't depend on device count)
             create_headerbar();
             
@@ -451,10 +535,6 @@ namespace Tailnet {
             // Assign as ApplicationWindow.titlebar
             titlebar = headerbar; 
 
-            // Update based upon tailscale status
-            update_connection_list_box();
-
-            
             // Setup left pane, depending on connection status
             update_main_ui();
 
