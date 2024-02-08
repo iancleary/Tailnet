@@ -6,7 +6,7 @@ project(
 )
 
 # Setup Dependenies, used in src/meson.build
-gtk_dep = dependency('gtk4')
+gtk_dep = dependency('gtk4', version: '>=4.6.9')
 granite_dep = dependency('granite-7')
 # posix_dep = meson.get_compiler('vala').find_library('posix')
 

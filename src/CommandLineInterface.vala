@@ -21,8 +21,8 @@ namespace Tailnet {
         public string ipv4_address;
         public string? ipv6_address;
         public string name;
-        //  public string username;
-        //  public string operating_system;
+        public string username;
+        public string operating_system;
         public string status;
     
         //  public void print() {
@@ -148,8 +148,8 @@ namespace Tailnet {
                         var connection = Connection() {
                             ipv4_address = line_parts[0],
                             name = line_parts[1],
-                            //  username = line_parts[2].replace("@",""),
-                            //  operating_system = line_parts[3],
+                            username = line_parts[2].replace("@",""),
+                            operating_system = line_parts[3],
                             status = status,
                         };
                         connection_list += connection;
@@ -168,6 +168,7 @@ namespace Tailnet {
             Connection connection = Connection();
             
             string[] lines = ip_command.stdout.split("\n"); 
+            connection.name = device;
             connection.ipv4_address = lines[0];
             connection.ipv6_address = lines[1];
             return connection;
