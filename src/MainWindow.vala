@@ -270,45 +270,9 @@ namespace Tailnet {
 
                 Gtk.Button connection_button = new Gtk.Button();
 
-                var connection_name_label = new Gtk.Label(null);
-                connection_name_label.set_markup ("<b>"+device.name + "</b>");
+                ConnectionListItem list_item = new ConnectionListItem(device);
 
-                var connection_status_icon = new Gtk.MenuButton() {
-                    can_focus = false,
-                    primary = true
-                };
-
-                if (device.status == "online") {
-                    // Green Dot
-                    connection_status_icon.set_icon_name("user-available");
-                }
-                else {
-                    // Gray Dot
-                    connection_status_icon.set_icon_name("user-offline");
-                }
-
-                Gtk.Box connection_label_top_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
-                connection_label_top_row.append(connection_status_icon);
-                connection_label_top_row.append(connection_name_label);
-                connection_label_top_row.set_margin_start(25);
-                connection_label_top_row.set_margin_end(25);
-                connection_label_top_row.halign = Gtk.Align.START;
-
-
-                Gtk.Label connection_label_bottom_row = new Gtk.Label(device.ipv4_address);
-                connection_label_bottom_row.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
-                connection_label_bottom_row.halign = Gtk.Align.START;
-                connection_label_bottom_row.set_margin_start (35);
-                connection_label_bottom_row.set_margin_end(25);
-
-                Gtk.Box connection_label_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 2);
-                connection_label_box.append(connection_label_top_row);
-                connection_label_box.append(connection_label_bottom_row);
-
-                connection_label_box.set_margin_top(0);
-                connection_label_box.set_margin_bottom(0);
-
-                connection_button.set_child(connection_label_box);
+                connection_button.set_child(list_item);
                 connection_button.add_css_class (Granite.STYLE_CLASS_FLAT);
 
                 connection_button.clicked.connect(() => {
@@ -341,43 +305,37 @@ namespace Tailnet {
             }
 
             // get device information
-            Connection ip_addresses = cli.get_device_ip(selected_device.name);
+            Connection device_with_ip_addresses = cli.get_device_ip(selected_device.name);
 
-            var addresses_label = new Gtk.Label(null);
-            addresses_label.set_markup ("<b>Tailscale Addresses</b>");
-            addresses_label.set_hexpand(true);
-            addresses_label.set_vexpand(true);
+            device_with_ip_addresses.status = selected_device.status;
+            device_with_ip_addresses.username = selected_device.username;
+            device_with_ip_addresses.operating_system = selected_device.operating_system;
+
+            ConnectionListItem device_info = new ConnectionListItem.with_details(device_with_ip_addresses);
+
+            info_box.append(device_info);
 
 
-            info_box.append(addresses_label);
+            //  var ipv4_address_label = new Gtk.Label(ip_addresses.ipv4_address);
+            //  var ipv6_address_label = new Gtk.Label(ip_addresses.ipv6_address);
 
 
-            var ipv4_address_label = new Gtk.Label(ip_addresses.ipv4_address);
-            var ipv6_address_label = new Gtk.Label(ip_addresses.ipv6_address);
-
-            ipv4_address_label.set_hexpand(true);
-            ipv6_address_label.set_hexpand(true);
-            ipv4_address_label.set_vexpand(true);
-            ipv6_address_label.set_vexpand(true);
-            ipv4_address_label.halign = Gtk.Align.FILL;
-            ipv6_address_label.halign = Gtk.Align.FILL;
-
-            // Add horizontal rule separator between children
+            //  // Add horizontal rule separator between children
             
-            Gtk.Label[] ip_address_labels = {ipv4_address_label, ipv6_address_label};
+            //  Gtk.Label[] ip_address_labels = {ipv4_address_label, ipv6_address_label};
 
-            foreach(Gtk.Label label in ip_address_labels) {
-                Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
-                hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
-                hr.set_margin_top(5);
+            //  foreach(Gtk.Label label in ip_address_labels) {
+            //      Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+            //      hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+            //      hr.set_margin_top(5);
 
-                hr.set_hexpand(true);
-                hr.halign = Gtk.Align.CENTER;
-                hr.set_vexpand(true);
+            //      hr.set_hexpand(true);
+            //      hr.halign = Gtk.Align.CENTER;
+            //      hr.set_vexpand(true);
 
-                info_box.append(hr);
-                info_box.append(label);
-            }
+            //      info_box.append(hr);
+            //      info_box.append(label);
+            //  }
         }
 
         private void reset_state() {
@@ -490,7 +448,7 @@ namespace Tailnet {
             content_grid.valign = Gtk.Align.FILL;
             content_grid.set_vexpand(true);
             content_grid.set_hexpand(true);
-            content_grid.add_css_class(Granite.STYLE_CLASS_FLAT);
+            content_grid.add_css_class(Granite.STYLE_CLASS_BACKGROUND);
 
             //  add_css_class(Granite.STYLE_CLASS_CHECKERBOARD);
             // titlebar

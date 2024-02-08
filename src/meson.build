@@ -5,8 +5,9 @@ app_deps = [
 
 app_sources = [
     'Application.vala',
-    'MainWindow.vala',
     'CommandLineInterface.vala',
+    'MainWindow.vala',
+    'Widgets/Connection.vala',
     'Widgets/ReconnectPromptBox.vala'
 ]
 
