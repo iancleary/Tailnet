@@ -1,8 +1,125 @@
+class Tailnet.ConnectionInfoItem : Gtk.Box {
+    // Setup parameters for periodic timer
+    private int update_period;
+    private uint delayed_changed_id;
+    private bool in_callback;
+    private int wait_in_seconds;
+
+    private Gtk.Button content_button;
+    private Gtk.Box content_box;
+    private Gtk.Button copy_button;
+    private Gtk.Button copy_complete_button;
+
+    
+
+    public string information_to_display {get; construct;}
+
+    
+
+    public ConnectionInfoItem(string information_to_display) {
+        Object(information_to_display: information_to_display);
+    }
+
+
+    private void reset_timeout(){
+        if(delayed_changed_id > 0)
+            Source.remove(delayed_changed_id);
+        delayed_changed_id = Timeout.add(update_period, timeout);
+    }
+    
+    private bool timeout(){
+        // do actual search here!
+
+        update_button_back();
+
+        delayed_changed_id = 0;
+
+        return false;
+    }
+
+    public void wait_to_ease_transition() {
+        Thread.usleep (wait_in_seconds); 
+    }
+
+    public void update_button_back() {
+
+
+        if (in_callback == true) {
+            // Ease transition time
+            wait_to_ease_transition();
+            in_callback = false;
+        }
+        
+        copy_complete_button.set_visible(false);
+        copy_button.set_visible(true);
+        
+        // Reset
+        reset_timeout();
+    }
+
+
+    construct {
+
+        content_button = new Gtk.Button() {focusable = false};
+        content_button.add_css_class(Granite.STYLE_CLASS_FLAT);
+
+        content_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+
+        append(content_button);
+
+        content_button.set_child(content_box);
+
+        copy_button = new Gtk.Button.from_icon_name("edit-copy") {focusable = false};
+        copy_complete_button = new Gtk.Button.from_icon_name("emblem-default") {focusable = false};
+
+        //  copy_button.set_visible(true);
+        copy_complete_button.set_visible(false);
+        content_box.append(copy_button);
+        content_box.append(copy_complete_button);
+
+
+        content_button.clicked.connect(() => {
+            in_callback = true;
+            set_clipboard(information_to_display);
+            copy_button.set_visible(false);
+            copy_complete_button.set_visible(true);
+           
+        });
+
+        orientation = Gtk.Orientation.VERTICAL;
+
+        // wait in seconds should be half of update_period
+        update_period = 500; // milliseconds -> 0.5 seconds
+        double wait = 0.25 * 1000000.0; // microseconds -> 0.25 seconds
+        wait_in_seconds = (int)wait; // cast double to int
+        
+
+        set_margin_top(0);
+        set_margin_bottom(0);
+
+         // setup periodic reset of button
+         in_callback = false;
+         timeout();
+
+         
+    }
+
+    public void set_clipboard(string text) {
+        var window = new Gtk.Window ();
+                    //  var display = window.get_display ();
+        var clipboard = window.get_clipboard();
+
+        clipboard.set_text (text);
+    }
+
+}
+
 
 class Tailnet.ConnectionListItem : Gtk.Box {
 
     public Tailnet.Connection device {get; construct;}
     public bool detailed_view {get; construct; default = false;}
+    
 
     public ConnectionListItem(Tailnet.Connection device) {
         Object(device: device);
@@ -41,13 +158,13 @@ class Tailnet.ConnectionListItem : Gtk.Box {
             
         
         if (detailed_view == true) {
-            Gtk.Button copy_name_button= new Gtk.Button.from_icon_name ("edit-copy");
-            copy_name_button.focusable = false;
-            //  copy_os_button.label = device.operating_system;
-            copy_name_button.clicked.connect(() => {
-                set_clipboard(device.name);
-            });
-            connection_label_top_row.append(copy_name_button);
+            //  Gtk.Button copy_name_button= new Gtk.Button.from_icon_name ("edit-copy");
+            //  copy_name_button.focusable = false;
+            //  //  copy_os_button.label = device.operating_system;
+            //  copy_name_button.clicked.connect(() => {
+            //      set_clipboard(device.name);
+            //  });
+            //  connection_label_top_row.append(copy_name_button);
 
             if (device.ipv4_address != null) {
                 append(get_detailed_row(device.ipv4_address));
@@ -93,27 +210,14 @@ class Tailnet.ConnectionListItem : Gtk.Box {
         Gtk.Box row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
         Gtk.Label label = new Gtk.Label(text);
 
-        Gtk.Button copy_button= new Gtk.Button.from_icon_name ("edit-copy");
-        copy_button.focusable = false;
-        //  copy_os_button.label = device.operating_system;
-        copy_button.clicked.connect(() => {
-            set_clipboard(text);
-        });
+        ConnectionInfoItem info_item = new ConnectionInfoItem(text);
         label.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
         row.halign = Gtk.Align.START;
         row.set_margin_start (35);
         row.set_margin_end(25);
 
         row.append(label);
-        row.append(copy_button);
+        row.append(info_item);
         return row;
-    }
-
-    public void set_clipboard(string text) {
-        var window = new Gtk.Window ();
-                    //  var display = window.get_display ();
-        var clipboard = window.get_clipboard();
-
-        clipboard.set_text (text);
     }
 }
