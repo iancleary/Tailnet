@@ -114,7 +114,7 @@ namespace Tailnet {
                         connection_list = cli.get_devices();
 
                         // Update UI
-                        update_main_ui();
+                        update_content_box();
                         update_connection_list_box();
 
                         // Notify
@@ -146,7 +146,7 @@ namespace Tailnet {
                         is_connected = false;
 
                         // Update UI
-                        update_main_ui();
+                        update_content_box();
 
                         // Notify
                         send_disconnection_successful_notification();
@@ -214,7 +214,7 @@ namespace Tailnet {
             switch_toggle.set_state(true);
         }
 
-        public void update_main_ui() {
+        public void update_content_box() {
             
             //  Empty Child
             Gtk.Widget? first_child = content_box.get_first_child();
@@ -269,7 +269,8 @@ namespace Tailnet {
             connection_list_box.set_margin_bottom(0);
 
             connection_list = cli.get_devices();
-            foreach (Connection device in connection_list) {
+            for(int i = 0; i<connection_list.length; i++) {
+                Connection device = connection_list[i];
 
                 Gtk.Button connection_button = new Gtk.Button();
 
@@ -321,11 +322,14 @@ namespace Tailnet {
 
                 connection_list_box.append(connection_button);
 
-                // Add horizontal rule separator between children
-                Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
-                hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
-                hr.set_margin_top(5);
-                connection_list_box.append(hr);
+                // If not the last index, append hr
+                if (i < connection_list.length - 1 ) {
+                    // Add horizontal rule separator between children
+                    Gtk.Separator hr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+                    hr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
+                    hr.set_margin_top(5);
+                    connection_list_box.append(hr);
+                }
             }   
         }
 
@@ -465,24 +469,6 @@ namespace Tailnet {
             // Ensure initial states match
             content_box_state = is_connected;
 
-            // List of devices in tailnet
-            if (is_connected == true) {
-                connection_list = cli.get_devices();
-
-                // Show information about first device if it exists
-                if (connection_list.length > 0) {
-                    selected_device = connection_list[0];
-                    // Update based upon tailscale status
-                    update_connection_list_box();
-                    
-                    update_info_box();
-                    
-                }
-            }
-            else {
-                connection_list = {};
-            }
-
             // to store wheter the UI shows the connection list/pane or reconnect prompt box
             content_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
             
@@ -531,12 +517,30 @@ namespace Tailnet {
             
             // Update headerbar widgets according to `is_connected`
             update_headerbar();
+
+            // List of devices in tailnet
+            if (is_connected == true) {
+                connection_list = cli.get_devices();
+
+                // Show information about first device if it exists
+                if (connection_list.length > 0) {
+                    selected_device = connection_list[0];
+
+                    // Update based upon tailscale status
+                    update_connection_list_box();
+
+                    update_info_box();
+                }
+            }
+            else {
+                connection_list = {};
+            }
             
             // Assign as ApplicationWindow.titlebar
             titlebar = headerbar; 
 
             // Setup left pane, depending on connection status
-            update_main_ui();
+            update_content_box();
 
             // Assign as ApplicationWIndow.child
             child = content_box;
