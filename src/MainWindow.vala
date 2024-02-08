@@ -25,7 +25,7 @@ namespace Tailnet {
         // Default to false, but poll CLI during construct, so initial state is never used
         private bool is_connected;
         // bool to track UI state to connection state
-        private bool content_box_state;
+        private bool content_grid_state;
 
         // Setup parameters for periodic timer
         private int update_period;
@@ -37,10 +37,8 @@ namespace Tailnet {
         private Connection[] connection_list;
 
         // Main UI Box to store wheter the UI shows the connection list/pane or reconnect prompt box
-        private Gtk.Box content_box;
+        private Gtk.Grid content_grid;
         
-        // Main UI when connected
-        private Gtk.Box paned;
         // List of devices or prompt to connect
         private Gtk.Box connection_list_box;
         private Gtk.Box info_box;
@@ -114,7 +112,7 @@ namespace Tailnet {
                         connection_list = cli.get_devices();
 
                         // Update UI
-                        update_content_box();
+                        update_content_grid();
                         update_connection_list_box();
 
                         // Notify
@@ -146,7 +144,7 @@ namespace Tailnet {
                         is_connected = false;
 
                         // Update UI
-                        update_content_box();
+                        update_content_grid();
 
                         // Notify
                         send_disconnection_successful_notification();
@@ -214,40 +212,38 @@ namespace Tailnet {
             switch_toggle.set_state(true);
         }
 
-        public void update_content_box() {
+        public void update_content_grid() {
             
             //  Empty Child
-            Gtk.Widget? first_child = content_box.get_first_child();
+            Gtk.Widget? first_child = content_grid.get_first_child();
 
             while (first_child != null) {
-                content_box.remove(first_child);
-                first_child = content_box.get_first_child();
+                content_grid.remove(first_child);
+                first_child = content_grid.get_first_child();
             }
 
             if (is_connected == false) {
-                content_box_state = false;
+                content_grid_state = false;
                 
-                content_box.valign = Gtk.Align.CENTER;
-                content_box.halign = Gtk.Align.CENTER;
-                content_box.set_hexpand(false);
+                content_grid.valign = Gtk.Align.CENTER;
+                content_grid.halign = Gtk.Align.CENTER;
+                content_grid.set_hexpand(true);
 
-                content_box.append(reconnect_prompt_box);
+                content_grid.attach(reconnect_prompt_box, 1, 1, 1, 1);
             }
             else {
-                content_box_state = false;
+                content_grid_state = true;
                 
-                content_box.valign = Gtk.Align.FILL;
-                content_box.halign = Gtk.Align.FILL;
+                content_grid.valign = Gtk.Align.FILL;
+                content_grid.halign = Gtk.Align.FILL;
 
-                Gtk.Separator vr = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
+                Gtk.Separator vr = new Gtk.Separator(Gtk.Orientation.VERTICAL);
                 vr.add_css_class(Granite.STYLE_CLASS_DIM_LABEL);
 
-                content_box.append(connection_list_box);
-                content_box.append(vr);
-                content_box.append(info_box);
-                content_box.set_hexpand(true);
+                content_grid.attach(connection_list_box, 0, 0, 1, 1);
+                content_grid.attach(vr, 1, 0, 1, 1);
+                content_grid.attach(info_box, 2, 0, 1, 1);
                 
-                content_box.append(paned);
             }
 
         }
@@ -467,10 +463,13 @@ namespace Tailnet {
             is_connected = cli.get_connection_status ();
             
             // Ensure initial states match
-            content_box_state = is_connected;
+            content_grid_state = is_connected;
 
             // to store wheter the UI shows the connection list/pane or reconnect prompt box
-            content_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            content_grid = new Gtk.Grid () {
+                column_spacing = 6,
+                row_spacing = 6,
+            };
             
             // List of devices or prompt to connect
             connection_list_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 5);            
@@ -482,20 +481,16 @@ namespace Tailnet {
             info_box.set_hexpand(true);
             info_box.set_vexpand(true);
 
-            info_box.add_css_class(Granite.STYLE_CLASS_VIEW);
+            //  info_box.add_css_class(Granite.STYLE_CLASS_VIEW);
             
             // prompt to show that you are not connected and prompt a reconnection
             reconnect_prompt_box = new ReconnectPromptBox(this);
 
-            // Main UI Widget
-            paned = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
-            paned.add_css_class(Granite.STYLE_CLASS_CARD);
-
-            content_box.halign = Gtk.Align.FILL;
-            content_box.valign = Gtk.Align.FILL;
-            content_box.set_vexpand(true);
-            content_box.set_hexpand(true);
-            content_box.add_css_class(Granite.STYLE_CLASS_FLAT);
+            content_grid.halign = Gtk.Align.FILL;
+            content_grid.valign = Gtk.Align.FILL;
+            content_grid.set_vexpand(true);
+            content_grid.set_hexpand(true);
+            content_grid.add_css_class(Granite.STYLE_CLASS_FLAT);
 
             //  add_css_class(Granite.STYLE_CLASS_CHECKERBOARD);
             // titlebar
@@ -540,10 +535,10 @@ namespace Tailnet {
             titlebar = headerbar; 
 
             // Setup left pane, depending on connection status
-            update_content_box();
+            update_content_grid();
 
             // Assign as ApplicationWIndow.child
-            child = content_box;
+            child = content_grid;
 
             // Set Up Initial Dimensions
             default_width = 600;
