@@ -1,7 +1,7 @@
 # project name and programming language
 project(
     'com.github.iancleary.Tailnet', 'vala', 'c',
-    version: '0.0.6',
+    version: '0.0.7',
     license: 'GPL'
 )
 
