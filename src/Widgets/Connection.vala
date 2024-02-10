@@ -167,6 +167,11 @@ class Tailnet.ConnectionListItem : Gtk.Box {
             //  });
             //  connection_label_top_row.append(copy_name_button);
 
+            // magic dns: https://tailscale.com/kb/1081/magicdns
+            if (device.ipv4_address != null) {
+                append(get_detailed_row("http://"+device.name));
+            }
+            
             if (device.ipv4_address != null) {
                 append(get_detailed_row(device.ipv4_address));
             }
