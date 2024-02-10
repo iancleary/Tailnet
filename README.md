@@ -10,6 +10,10 @@ Tailnet is an unofficial GUI wrapper around the Tailscale CLI client, particular
 
 Tailnet interfaces with the Tailscale daemon, `tailscaled`, to perform many of its operations. In order for this to work, the daemon must have been configured with the current user as the "operator". To do this, run `sudo tailscale set --operator=$USER` from the command-line at least once manually.
 
+## Device List and Copy Paste Ready
+
+![Screenshot of application with Devices in Tailnet shown in left sidebar, with detailed view of selected device on the right](Tailnet_DeviceList.png)
+
 ## Inspiration and Attribution
 
 This application started a way to learn more about Vala and Elementary OS' application [developer docs](https://docs.elementary.io/develop/).
