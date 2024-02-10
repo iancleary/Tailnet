@@ -5,3 +5,6 @@ builddir/
 
 # scrathpad for function development
 scratchpad
+
+# Code (https://github.com/elementary/code)
+*~
