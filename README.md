@@ -10,9 +10,18 @@ Tailnet is an unofficial GUI wrapper around the Tailscale CLI client, particular
 
 Tailnet interfaces with the Tailscale daemon, `tailscaled`, to perform many of its operations. In order for this to work, the daemon must have been configured with the current user as the "operator". To do this, run `sudo tailscale set --operator=$USER` from the command-line at least once manually.
 
-## Device List and Copy Paste Ready
+## Device List is Copy and Paste Ready
 
-![Screenshot of application with Devices in Tailnet shown in left sidebar, with detailed view of selected device on the right](Tailnet_DeviceList.png)
+![Screenshot of application with Devices in Tailnet shown in left sidebar, with detailed view of selected device on the right](docs/Tailnet_DeviceList.png)
+
+
+## Flatpak Support
+
+Yes, the flatpak file exists and can be made locally.
+
+The problem statement is that the command `tailscale X` cannot be run from within the container (with the operator set to `$USER`).
+
+I am assuming the `tailscale` binary will need to be included within the Flatpak.  I haven't looked into it beyond that.
 
 ## Inspiration and Attribution
 
