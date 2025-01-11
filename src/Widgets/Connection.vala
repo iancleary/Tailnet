@@ -141,11 +141,11 @@ class Tailnet.ConnectionListItem : Gtk.Box {
 
         if (device.status == "online") {
             // Green Dot
-            connection_status_icon.set_icon_name("user-available");
+            connection_status_icon.set_icon_name("emblem-default");
         }
         else {
             // Gray Dot
-            connection_status_icon.set_icon_name("user-offline");
+            connection_status_icon.set_icon_name("emblem-important-symbolic");
         }
 
         Gtk.Box connection_label_top_row = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
