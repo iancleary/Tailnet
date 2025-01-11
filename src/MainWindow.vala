@@ -87,72 +87,75 @@ namespace Tailnet {
             connect_switch_toggle_signal();
         }
 
+        public void connect_command() {
+
+            Command connect_command = cli.attempt_connection();
+
+            cli.wait_for_connection_status_to_stabalize();
+
+            if (debug == true) {
+                string notification_title = "Debug - Connect: " + connect_command.status.to_string() + " " + is_connected.to_string();
+                var notification = new Notification (notification_title);
+                notification.set_body ("`tailscale up` executed successfully!");
+
+                application.send_notification (null, notification);
+            }
+
+            if (connect_command.status == 0) {
+
+                // Update state variables
+                is_connected = true;
+                connection_list = cli.get_devices();
+
+                // Update UI
+                update_content_grid();
+                update_connection_list_box();
+
+                // Notify
+                send_connection_successful_notification();
+            } 
+            else {
+                // Notify
+                send_connection_failure_notification();
+            }
+        }
+
+        public void disconnect_command() {
+            Command disconnect_command = cli.attempt_disconnection();
+                    
+            if (debug == true) {
+                string notification_title = "Debug - Disconnect: " + disconnect_command.status.to_string() + " " + is_connected.to_string();
+                var notification = new Notification (notification_title);
+                notification.set_body ("`tailscale up` executed successfully!");
+
+                application.send_notification (null, notification);
+            }
+
+            if (disconnect_command.status == 0) {
+
+                is_connected = false;
+
+                // Update UI
+                update_content_grid();
+
+                // Notify
+                send_disconnection_successful_notification();
+            } 
+            else {
+                // Notify
+                send_disconnection_failure_notification();
+            }
+        }
+
         public void connect_switch_toggle_signal() {
              // Connect signal to notifications after initial state is set
              switch_toggle.notify["active"].connect (() => {
                 if (switch_toggle.active) {
                     // tailscale up -> ON
-                    
-                    Command connect_command = cli.attempt_connection();
-
-                    cli.wait_for_connection_status_to_stabalize();
-
-                    if (debug == true) {
-                        string notification_title = "Debug - Connect: " + connect_command.status.to_string() + " " + is_connected.to_string();
-                        var notification = new Notification (notification_title);
-                        notification.set_body ("`tailscale up` executed successfully!");
-
-                        application.send_notification (null, notification);
-                    }
-
-                    if (connect_command.status == 0) {
-
-                        // Update state variables
-                        is_connected = true;
-                        connection_list = cli.get_devices();
-
-                        // Update UI
-                        update_content_grid();
-                        update_connection_list_box();
-
-                        // Notify
-                        send_connection_successful_notification();
-                    } 
-                    else {
-                        // Notify
-                        send_connection_failure_notification();
-                    }
-                    
-                    
-
+                    connect_command();
                 } else {
                     // tailscale down -> OFF
-                    
-                    Command disconnect_command = cli.attempt_disconnection();
-                    
-
-                    if (debug == true) {
-                        string notification_title = "Debug - Disconnect: " + disconnect_command.status.to_string() + " " + is_connected.to_string();
-                        var notification = new Notification (notification_title);
-                        notification.set_body ("`tailscale up` executed successfully!");
-
-                        application.send_notification (null, notification);
-                    }
-
-                    if (disconnect_command.status == 0) {
-
-                        is_connected = false;
-
-                        // Update UI
-                        update_content_grid();
-
-                        // Notify
-                        send_disconnection_successful_notification();
-                    } 
-                    else {
-                        // Notify
-                        send_disconnection_failure_notification();
-                    }
+                    disconnect_command();
                 }
             });
         }
@@ -198,18 +201,20 @@ namespace Tailnet {
         public void update_headerbar() {
             // set switch_toggle state so it starts up correctly
             if (is_connected == true) {
-                switch_toggle.set_state (true);
+                switch_toggle.set_active(true);
             }
             else {
-                switch_toggle.set_state (false);
+                switch_toggle.set_active(false);
             }
         }
 
         public void reconnect() {
             // tailscale up -> ON
             // Run command first, then if exit code is 0, proceed to update UI
+            connect_command();
             is_connected = true;
-            switch_toggle.set_state(true);
+            update_headerbar();
+            update_info_box();
         }
 
         public void update_content_grid() {
@@ -456,6 +461,7 @@ namespace Tailnet {
                 show_title_buttons = true
             };
             switch_toggle = new Gtk.Switch ();
+            switch_toggle.active = is_connected;
             connection_status_label = new Gtk.Label("");
 
 
